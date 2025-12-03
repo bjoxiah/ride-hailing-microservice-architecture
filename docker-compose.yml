@@ -1,0 +1,120 @@
+services:
+  # ------------------------------
+  # User Service
+  # ------------------------------
+  user-service:
+    build: ./services/user-service
+    ports:
+      - "8002:8002"
+    depends_on:
+      - postgres-user-service
+      - otel-collector
+      - redpanda
+
+  # ------------------------------
+  # PostgreSQL
+  # ------------------------------
+  postgres-user-service:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgresuser
+      POSTGRES_PASSWORD: postgrespwd
+      POSTGRES_DB: userdb
+    volumes:
+      - user-service-db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres-user-service
+
+  # ------------------------------
+  # Redpanda Kafka
+  # ------------------------------
+  redpanda:
+    image: redpandadata/redpanda:latest
+    container_name: redpanda
+    command: >
+      redpanda start
+      --overprovisioned
+      --smp 1
+      --memory 1G
+      --reserve-memory 0M
+      --node-id 0
+      --check=false
+      --set redpanda.enable_transactions=true
+      --set redpanda.enable_idempotence=true
+      --advertise-kafka-addr redpanda:9092
+      --kafka-addr 0.0.0.0:9092
+    ports:
+      - "9092:9092"
+      - "9644:9644"
+
+  redpanda-console:
+    image: redpandadata/console:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_BROKERS=redpanda:9092
+    depends_on:
+      - redpanda
+
+  # ------------------------------
+  # Prometheus & Grafana
+  # ------------------------------
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: mypass
+    ports:
+      - "3002:3002"
+    depends_on:
+      - prometheus
+
+  # ------------------------------
+  # OpenTelemetry Collector
+  # ------------------------------
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./monitoring/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"   # gRPC OTLP
+      - "4318:4318"   # HTTP OTLP
+      - "8889:8889"   # Metrics
+    depends_on:
+      - prometheus
+      - jaeger
+
+  jaeger:
+    image: cr.jaegertracing.io/jaegertracing/jaeger:2.12.0
+    container_name: jaeger
+    ports:
+      - "16686:16686"  # Jaeger UI
+    environment:
+      # Enable OTLP gRPC receiver
+      COLLECTOR_OTLP_ENABLED: "true"
+      COLLECTOR_OTLP_GRPC_PORT: "4317"
+      COLLECTOR_OTLP_HTTP_PORT: "4318"
+      # Optional: memory storage
+      SPAN_STORAGE_TYPE: "memory"
+
+volumes:
+  user-service-db-data:
