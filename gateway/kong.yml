@@ -1,0 +1,63 @@
+_format_version: "2.1"
+_transform: true
+
+# ---------------------------
+# Services
+# ---------------------------
+services:
+  - name: ride-service
+    url: http://ride-service:3000
+    routes:
+      - name: ride-api
+        paths:
+          - /api/rides
+
+  - name: user-service
+    url: http://user-service:8002
+    routes:
+      - name: user-api
+        paths:
+          - /api/users
+
+  - name: vehicle-service
+    url: http://vehicle-service:6000
+    routes:
+      - name: vehicle-api
+        paths:
+          - /api/vehicles
+
+  - name: billing-service
+    url: http://billing-service:7000
+    routes:
+      - name: billing-api
+        paths:
+          - /api/billing
+
+  - name: notification-service
+    url: http://notification-service:8000
+    routes:
+      - name: notification-api
+        paths:
+          - /api/notifications
+
+# ---------------------------
+# Global Plugins (Optional)
+# ---------------------------
+plugins:
+  # Apply logging or monitoring globally if desired
+  - name: prometheus
+    config:
+      port: 9542
+  # JWT Auth via Google OIDC
+  - name: oidc
+    config:
+      client_id: "<YOUR_GOOGLE_CLIENT_ID>"
+      client_secret: "<YOUR_GOOGLE_CLIENT_SECRET>"
+      discovery: "https://accounts.google.com/.well-known/openid-configuration"
+      introspect: false
+  # Rate limiting
+  - name: rate-limiting
+    config:
+      minute: 30   # max 30 requests per minute per client
+      hour: 500    # max 500 requests per hour
+      policy: local
