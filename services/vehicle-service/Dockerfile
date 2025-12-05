@@ -1,15 +1,27 @@
-FROM golang:1.22-alpine AS builder
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
 
+# Copy csproj and restore with force
+COPY *.csproj ./
+RUN dotnet nuget locals all --clear
+RUN dotnet restore --no-cache
+
+# Copy everything else and publish
+COPY . ./
+RUN dotnet publish -c Release -o /app/publish
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
-COPY . .
 
-RUN go mod download
-RUN go build -o vehicle-service main.go
+# Copy publish output
+COPY --from=build /app/publish ./
 
-FROM alpine:latest
-WORKDIR /root/
-COPY --from=builder /app/vehicle-service .
+# Expose container port
+EXPOSE 8088
 
-EXPOSE 6000
+# Bind Kestrel to all network interfaces
+ENV ASPNETCORE_URLS=http://+:8088
 
-CMD ["./vehicle-service"]
+ENTRYPOINT ["dotnet", "vehicle-service.dll"]

@@ -1,3 +1,6 @@
 __pycache__
 *.lock
 *.env
+bin
+obj
+.DS_STORE
