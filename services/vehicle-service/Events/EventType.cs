@@ -1,8 +1,6 @@
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
-namespace VehicleService.Events;
-
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum EventType
 {

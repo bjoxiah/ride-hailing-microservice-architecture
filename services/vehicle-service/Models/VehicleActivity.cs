@@ -4,7 +4,9 @@ namespace VehicleService.Models
     {
         Idle, // Available
         EnRoute, // Heading to pick up a rider
+        Decision, // Waiting to accpet/decline a ride
         Busy, // With a rider
+        OnATrip, // Heading with a rider to destination
         Offline // Not available
     }
 
