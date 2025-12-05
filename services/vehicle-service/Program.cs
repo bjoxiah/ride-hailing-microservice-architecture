@@ -29,10 +29,10 @@ builder.Services.AddOpenTelemetry()
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddSource(serviceName)
-        .AddJaegerExporter(options =>
+        .AddOtlpExporter(options =>
         {
-            options.AgentHost = jaegerHost;
-            options.AgentPort = jaegerPort;
+            // The default is OTLP/gRPC to port 4317, which matches your settings
+            options.Endpoint = new Uri($"http://{jaegerHost}:{jaegerPort}");
         }));
 
 // -------------------------
@@ -127,7 +127,7 @@ app.MapMetrics(); // exposes /metrics endpoint
 
 // Map Minimal API endpoints
 app.MapVehiclesEndpoints();
-app.MapVehicleActivitiesEndpoints();
+app.MapVehicleActivityEndpoints();
 
 // Swagger / OpenAPI middleware (only in development)
 if (app.Environment.IsDevelopment())
