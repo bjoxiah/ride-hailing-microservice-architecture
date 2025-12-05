@@ -1,5 +1,6 @@
 from enum import Enum
 import re
+import uuid
 from typing_extensions import Annotated
 from pydantic import EmailStr, constr, field_validator
 from sqlmodel import SQLModel, Field
@@ -8,7 +9,7 @@ from datetime import datetime, timezone
 
 # Database model
 class User(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str
     email: str = Field(sa_column_kwargs={"unique": True})
     phone_number: Optional[str] = None
