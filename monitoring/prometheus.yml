@@ -29,14 +29,14 @@ scrape_configs:
   # ------------------------------
   - job_name: "ride-service"
     static_configs:
-      - targets: ["ride-service:3000"]  # port of /metrics endpoint
+      - targets: ["ride-service:4040"]  # port of /metrics endpoint
 
   # ------------------------------
   # Vehicle service metrics
   # ------------------------------
   - job_name: "vehicle-service"
     static_configs:
-      - targets: ["vehicle-service:6000"]
+      - targets: ["vehicle-service:8088"]
 
   # ------------------------------
   # Payment service metrics

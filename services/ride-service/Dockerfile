@@ -1,12 +1,19 @@
-FROM node:18-alpine
+FROM node:20-alpine
+
+# Install pnpm globally
+RUN npm install -g pnpm
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install --production
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies (uses pnpm store)
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-EXPOSE 3000
+RUN pnpm build
 
-CMD ["npm", "start"]
+ENV NODE_ENV=production
+
+CMD ["pnpm", "start"]
