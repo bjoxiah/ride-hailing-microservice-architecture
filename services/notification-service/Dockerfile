@@ -1,12 +1,19 @@
-FROM python:3.11-slim
+FROM node:20-alpine
+
+# Install pnpm globally
+RUN npm install -g pnpm
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies (uses pnpm store)
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-EXPOSE 8000
+RUN pnpm build
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENV NODE_ENV=production
+
+CMD ["pnpm", "start"]
