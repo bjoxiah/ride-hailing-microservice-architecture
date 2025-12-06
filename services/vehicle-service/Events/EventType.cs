@@ -14,5 +14,13 @@ public enum EventType
     VehicleActivityCreated,
 
     [EnumMember(Value = "vehicle_activity.updated")]
-    VehicleActivityUpdated
+    VehicleActivityUpdated,
+
+    [EnumMember(Value = "vehicle.assigned")]
+    VehicleAssigned,
+
+    [EnumMember(Value = "vehicle.arrived")]
+    VehicleArrived,
+    [EnumMember(Value = "vehicle.unavalailable")]
+    VehicleUnavailable,
 }
