@@ -43,7 +43,7 @@ scrape_configs:
   # ------------------------------
   - job_name: "payment-service"
     static_configs:
-      - targets: ["payment-service:7000"]
+      - targets: ["payment-service:5060"]
 
   # ------------------------------
   # Notification service metrics
