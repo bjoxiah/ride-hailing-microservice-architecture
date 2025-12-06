@@ -13,12 +13,12 @@ class User(SQLModel, table=True):
     name: str
     email: str = Field(sa_column_kwargs={"unique": True})
     phone_number: Optional[str] = None
-    role: str
+    account: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-class UserRole(str, Enum):
+class UserAccount(str, Enum):
     rider = "rider"
     driver = "driver"
     
@@ -26,7 +26,7 @@ class UserRole(str, Enum):
 class UserCreate(SQLModel):
     name: str = Field(..., min_length=2, max_length=50)
     email: EmailStr
-    role: UserRole
+    account: UserAccount
     phone_number:  Optional[str] = None
     
     @field_validator("phone_number")
@@ -43,6 +43,6 @@ class UserCreate(SQLModel):
 class UserUpdate(SQLModel):
     name: Optional[str] = None
     email: Optional[str] = None
-    role: Optional[str] = None
+    account: Optional[str] = None
     phone_number: Optional[str] = None
 
